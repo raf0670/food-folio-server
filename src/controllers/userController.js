@@ -1,4 +1,4 @@
-const { getUserById } = require("../services/userService");
+const { getUserById, updateUserProfileInDb } = require("../services/userService");
 
 const getCurrentUser = async (req, res) => {
     try {
@@ -43,4 +43,35 @@ const getProfileDisplayUserById = async (req, res) => {
     }
 };
 
-module.exports = { getCurrentUser, getProfileDisplayUserById };
+const updateProfileBasicInformation = async (req, res) => {
+    try {
+        const userId = req.user?.userId;
+        const { name, bio, current_city, current_country } = req.body;
+
+        if (!userId) {
+            return res.status(401).json({ message: 'Unauthorized: User ID missing from request.' });
+        }
+
+        const updatedUser = await updateUserProfileInDb(userId, {
+            name,
+            bio,
+            current_city,
+            current_country
+        });
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: 'Update failed.' });
+        }
+
+        return res.status(200).json({
+            message: 'Profile updated successfully',
+            user: updatedUser
+        });
+
+    } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+module.exports = { getCurrentUser, getProfileDisplayUserById, updateProfileBasicInformation };
