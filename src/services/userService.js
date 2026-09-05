@@ -1,9 +1,12 @@
 const { db } = require("../config/dbConfig");
+const { checkPassword } = require("./authService");
+const bcrypt = require('bcryptjs');
 
 const getUserById = async (id) => {
     return await db.oneOrNone(`
         SELECT
             id,
+            password,
             created_at,
             name,
             email,
@@ -49,4 +52,24 @@ const updateUserProfileInDb = async (userId, fieldsToUpdate) => {
     });
 };
 
-module.exports = { getUserById, updateUserProfileInDb };
+const updatePasswordService = async (userId, oldPassword, newPassword) => {
+    const user = await getUserById(userId);
+
+    if (!user) {
+        throw new Error('User not found.');
+    }
+
+    const isPasswordValid = await checkPassword(oldPassword, user.password)
+    if (!isPasswordValid) {
+        throw new Error('Incorrect current password.');
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const newPasswordHash = await bcrypt.hash(newPassword, salt);
+
+    await db.none('UPDATE users SET password = $1 WHERE id = $2', [newPasswordHash, userId]);
+
+    return { message: 'Password updated successfully.' };
+};
+
+module.exports = { getUserById, updateUserProfileInDb, updatePasswordService };

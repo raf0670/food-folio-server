@@ -1,4 +1,4 @@
-const { getUserById, updateUserProfileInDb } = require("../services/userService");
+const { getUserById, updateUserProfileInDb, updatePasswordService } = require("../services/userService");
 
 const getCurrentUser = async (req, res) => {
     try {
@@ -74,4 +74,23 @@ const updateProfileBasicInformation = async (req, res) => {
     }
 };
 
-module.exports = { getCurrentUser, getProfileDisplayUserById, updateProfileBasicInformation };
+const updatePassword = async (req, res) => {
+    try {
+        const userId = req?.user?.userId;
+        const { oldPassword, newPassword } = req.body;
+
+        if (!oldPassword || !newPassword) {
+            return res.status(400).json({ success: false, message: 'All fields are required.' });
+        }
+
+        const result = await updatePasswordService(userId, oldPassword, newPassword);
+
+        // console.log("success");
+        return res.status(200).json({ success: true, message: result.message });
+    } catch (error) {
+        console.error('Password update error:', error.message);
+        return res.status(400).json({ success: false, message: error.message || 'Failed to update password.' });
+    }
+};
+
+module.exports = { getCurrentUser, getProfileDisplayUserById, updateProfileBasicInformation, updatePassword };
