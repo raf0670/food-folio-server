@@ -53,4 +53,22 @@ const postRestaurantByUserIdAndRestaurantManager = async (userId, name, descript
     }
 };
 
-module.exports = { getUserRestaurantsByUserID, postRestaurantByUserIdAndRestaurantManager };
+const getUnapprovedRestaurantsService = async () => {
+    try {
+        const restaurants = await db.manyOrNone(
+            `
+            SELECT *
+            FROM restaurants
+            WHERE is_approved = false
+            ORDER BY created_at DESC
+            `
+        );
+
+        return restaurants;
+    } catch (error) {
+        console.error('Error fetching unapproved restaurants:', error);
+        throw error;
+    }
+};
+
+module.exports = { getUserRestaurantsByUserID, postRestaurantByUserIdAndRestaurantManager,getUnapprovedRestaurantsService };

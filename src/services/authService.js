@@ -4,7 +4,7 @@ const { SignJWT } = require('jose');
 
 const searchUserByEmail = async (email) => {
     return db.oneOrNone(`
-        SELECT id, password
+        SELECT *
         FROM users
         WHERE email = $1
         `,
