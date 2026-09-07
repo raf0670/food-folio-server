@@ -62,7 +62,8 @@ const createToken = async (user) => {
     // console.log(secret);
 
     const token = await new SignJWT({
-        userId: user.id
+        userId: user.id,
+        userRole: user.role
     })
     .setProtectedHeader({alg: 'HS256'})
     .setIssuedAt()
