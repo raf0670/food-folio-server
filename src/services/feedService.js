@@ -1,6 +1,6 @@
 const { db } = require("../config/dbConfig");
 
-const getReviewsByRadius = async (lat, lng) => {
+const getReviewsByRadius = async (lat, lng, rad) => {
     const query = `
         SELECT 
             r.id AS review_id, 
