@@ -59,9 +59,10 @@ const getUnapprovedRestaurantsService = async () => {
             `
             SELECT *
             FROM restaurants
-            WHERE is_approved = false
+            WHERE approval_status = $1
             ORDER BY created_at DESC
-            `
+            `,
+            ['pending']
         );
 
         return restaurants;
@@ -71,4 +72,23 @@ const getUnapprovedRestaurantsService = async () => {
     }
 };
 
-module.exports = { getUserRestaurantsByUserID, postRestaurantByUserIdAndRestaurantManager,getUnapprovedRestaurantsService };
+const updateRestaurantApprovalService = async (restaurantId, approvalStatus) => {
+    try {
+        const restaurant = await db.oneOrNone(
+            `
+            UPDATE restaurants
+            SET approval_status = $1
+            WHERE id = $2
+            RETURNING *
+            `,
+            [approvalStatus, restaurantId]
+        );
+
+        return restaurant;
+    } catch (error) {
+        console.error('Error updating restaurant approval:', error);
+        throw error;
+    }
+};
+
+module.exports = { getUserRestaurantsByUserID, postRestaurantByUserIdAndRestaurantManager, getUnapprovedRestaurantsService, updateRestaurantApprovalService };

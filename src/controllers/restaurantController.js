@@ -1,4 +1,4 @@
-const { getUserRestaurantsByUserID, postRestaurantByUserIdAndRestaurantManager, getUnapprovedRestaurantsService } = require("../services/restaurantService");
+const { getUserRestaurantsByUserID, postRestaurantByUserIdAndRestaurantManager, getUnapprovedRestaurantsService, updateRestaurantApprovalService } = require("../services/restaurantService");
 
 const getUserRestaurants = async (req, res) => {
     try {
@@ -73,4 +73,49 @@ const getUnapprovedRestaurants = async (req, res) => {
     }
 };
 
-module.exports = { getUserRestaurants, createRestaurant, getUnapprovedRestaurants };
+const updateRestaurantApproval = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { approval_status } = req.body;
+
+        const allowedStatuses = [
+            'pending',
+            'approved',
+            'rejected'
+        ];
+
+        if (!allowedStatuses.includes(approval_status)) {
+            return res.status(400).json({
+                message: 'Invalid approval status'
+            });
+        }
+
+        const restaurant = await updateRestaurantApprovalService(
+            id,
+            approval_status
+        );
+
+        if (!restaurant) {
+            return res.status(404).json({
+                message: 'Restaurant not found'
+            });
+        }
+
+        return res.status(200).json({
+            message: `Restaurant ${approval_status} successfully`,
+            restaurant
+        });
+
+    } catch (error) {
+        console.error(
+            'Error updating restaurant approval:',
+            error
+        );
+
+        return res.status(500).json({
+            message: 'Failed to update restaurant approval status'
+        });
+    }
+};
+
+module.exports = { getUserRestaurants, createRestaurant, getUnapprovedRestaurants, updateRestaurantApproval };
