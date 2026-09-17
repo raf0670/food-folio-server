@@ -1,4 +1,4 @@
-const { getUserRestaurantsByUserID, postRestaurantByUserIdAndRestaurantManager, getUnapprovedRestaurantsService, updateRestaurantApprovalService, getRestaurantByRestaurantIdService } = require("../services/restaurantService");
+const { getUserRestaurantsByUserID, postRestaurantByUserIdAndRestaurantManager, getUnapprovedRestaurantsService, updateRestaurantApprovalService, getRestaurantByRestaurantIdService, checkRestaurantManagerService } = require("../services/restaurantService");
 
 const getUserRestaurants = async (req, res) => {
     try {
@@ -121,6 +121,7 @@ const updateRestaurantApproval = async (req, res) => {
 const getRestaurantByRestaurantId = async (req, res) => {
     try {
         const { restaurantId } = req.params;
+        const userId = req.user.userId;
 
         if (!restaurantId) {
             return res.status(400).json({
@@ -128,7 +129,16 @@ const getRestaurantByRestaurantId = async (req, res) => {
             });
         }
 
-        const restaurant = await getRestaurantByRestaurantIdService(restaurantId);
+        const isManager = await checkRestaurantManagerService(userId, restaurantId);
+
+        if (!isManager) {
+            return res.status(403).json({
+                message: 'You do not have access to this restaurant',
+            });
+        }
+
+        const restaurant =
+            await getRestaurantByRestaurantIdService(restaurantId);
 
         if (!restaurant) {
             return res.status(404).json({
@@ -140,7 +150,10 @@ const getRestaurantByRestaurantId = async (req, res) => {
             restaurant,
         });
     } catch (error) {
-        console.error('Error in getRestaurantById controller:', error);
+        console.error(
+            'Error in getRestaurantByRestaurantId controller:',
+            error
+        );
 
         return res.status(500).json({
             message: 'Failed to fetch restaurant',

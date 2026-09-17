@@ -109,4 +109,23 @@ const getRestaurantByRestaurantIdService = async (restaurantId) => {
     }
 };
 
-module.exports = { getUserRestaurantsByUserID, postRestaurantByUserIdAndRestaurantManager, getUnapprovedRestaurantsService, updateRestaurantApprovalService, getRestaurantByRestaurantIdService };
+const checkRestaurantManagerService = async (userId, restaurantId) => {
+    try {
+        const manager = await db.oneOrNone(
+            `
+            SELECT 1
+            FROM restaurant_manager
+            WHERE user_id = $1
+              AND restaurant_id = $2
+            `,
+            [userId, restaurantId]
+        );
+
+        return !!manager;
+    } catch (error) {
+        console.error('Error checking restaurant manager:', error);
+        throw error;
+    }
+};
+
+module.exports = { getUserRestaurantsByUserID, postRestaurantByUserIdAndRestaurantManager, getUnapprovedRestaurantsService, updateRestaurantApprovalService, getRestaurantByRestaurantIdService, checkRestaurantManagerService };
