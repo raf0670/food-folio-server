@@ -91,4 +91,22 @@ const updateRestaurantApprovalService = async (restaurantId, approvalStatus) => 
     }
 };
 
-module.exports = { getUserRestaurantsByUserID, postRestaurantByUserIdAndRestaurantManager, getUnapprovedRestaurantsService, updateRestaurantApprovalService };
+const getRestaurantByRestaurantIdService = async (restaurantId) => {
+    try {
+        const restaurant = await db.oneOrNone(
+            `
+            SELECT *
+            FROM restaurants
+            WHERE id = $1
+            `,
+            [restaurantId]
+        );
+
+        return restaurant;
+    } catch (error) {
+        console.error('Error fetching restaurant by ID:', error);
+        throw error;
+    }
+};
+
+module.exports = { getUserRestaurantsByUserID, postRestaurantByUserIdAndRestaurantManager, getUnapprovedRestaurantsService, updateRestaurantApprovalService, getRestaurantByRestaurantIdService };
