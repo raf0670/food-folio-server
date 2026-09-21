@@ -5,6 +5,7 @@ const serverHealthRoute = require('./routes/serverHealthRoute');
 const authRoute = require('./routes/authRoute');
 const userRoute = require('./routes/userRoute');
 const restaurantRoute = require('./routes/restaurantRoute');
+const branchRoute = require('./routes/branchRoute');
 
 const app = express();
 
@@ -22,5 +23,8 @@ app.use('/api/users', userRoute)
 
 // restaurant APIs
 app.use('/api/restaurant', restaurantRoute);
+
+// branch APIs
+app.use('api/branch', branchRoute);
 
 module.exports = app;
