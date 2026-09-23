@@ -1,7 +1,7 @@
 const { db } = require("../config/dbConfig");
 
-const getReviewsByRadius = async (lat, lng, rad) => {
-    const query = `
+const getReviewsByRadius = async (lat, lng, rad, search) => {
+    let query = `
         SELECT 
             r.id AS review_id, 
             r.content, 
@@ -23,16 +23,23 @@ const getReviewsByRadius = async (lat, lng, rad) => {
             ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography, 
             $3
         )
-        ORDER BY r.created_at DESC
-        LIMIT 50;
     `;
 
-  // $1 = lng, $2 = lat
-    return await db.any(query, [lng, lat, rad]);
+    const params = [lng, lat, rad];
+
+    if (search) {
+        query += ` AND rest.name ILIKE $4`;
+        params.push(`%${search}%`);           
+    }
+
+    query += ` ORDER BY r.created_at DESC LIMIT 50;`;
+
+  // $1 = lng, $2 = lat, $3 = rad, $4 = search
+    return await db.any(query, params);
 };
 
-const getReviewsByCity = async (city) => {
-    const query = `
+const getReviewsByCity = async (city, search) => {
+    let query = `
         SELECT 
             r.id AS review_id, 
             r.content, 
@@ -50,12 +57,18 @@ const getReviewsByCity = async (city) => {
         JOIN branches b ON r.branch_id = b.id
         JOIN restaurants rest ON b.restaurant_id = rest.id
         WHERE b.city ILIKE $1
-        ORDER BY r.created_at DESC
-        LIMIT 50;
     `;
+    const params = [city];
 
-  // $1 = city
-    return await db.any(query, [city]);
+    if (search) {
+        query += ` AND rest.name ILIKE $2`;
+        params.push(`%${search}%`);
+    }
+
+    query += ` ORDER BY r.created_at DESC LIMIT 50;`;
+    
+    // $1 = city
+    return await db.any(query, params);
 };
 
 module.exports = {
