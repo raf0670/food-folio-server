@@ -25,6 +25,6 @@ app.use('/api/users', userRoute)
 app.use('/api/restaurant', restaurantRoute);
 
 // branch APIs
-app.use('api/branch', branchRoute);
+app.use('/api/branch', branchRoute);
 
 module.exports = app;
