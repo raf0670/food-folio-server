@@ -1,4 +1,4 @@
-const { isUserFollowingService, toggleFollowService } = require("../services/followService");
+const { isUserFollowingService, toggleFollowService, getFollowerCountByUserIdService } = require("../services/followService");
 
 const isUserFollowing = async (req, res) => {
     try {
@@ -61,4 +61,31 @@ const toggleFollow = async (req, res) => {
     }
 };
 
-module.exports = { isUserFollowing, toggleFollow };
+const getFollowerCountByUserId = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        if (!userId) {
+            return res.status(400).json({
+                message: 'User ID is required',
+            });
+        }
+
+        const followerCount = await getFollowerCountByUserIdService(userId);
+
+        return res.status(200).json({
+            followerCount,
+        });
+    } catch (error) {
+        console.error(
+            'Error in getFollowerCountByUserId:',
+            error
+        );
+
+        return res.status(500).json({
+            message: 'Failed to fetch follower count',
+        });
+    }
+};
+
+module.exports = { isUserFollowing, toggleFollow, getFollowerCountByUserId };

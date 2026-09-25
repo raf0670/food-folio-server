@@ -62,4 +62,26 @@ const toggleFollowService = async (followerId, followingId) => {
     }
 };
 
-module.exports = { isUserFollowingService, toggleFollowService };
+const getFollowerCountByUserIdService = async (userId) => {
+    try {
+        const result = await db.one(
+            `
+            SELECT COUNT(*)::int AS follower_count
+            FROM follow
+            WHERE following_id = $1
+            `,
+            [userId]
+        );
+
+        return result.follower_count;
+    } catch (error) {
+        console.error(
+            'Error getting follower count:',
+            error
+        );
+
+        throw error;
+    }
+};
+
+module.exports = { isUserFollowingService, toggleFollowService, getFollowerCountByUserIdService };
