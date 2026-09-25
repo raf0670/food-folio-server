@@ -1,4 +1,4 @@
-const { isUserFollowingService } = require("../services/followService");
+const { isUserFollowingService, toggleFollowService } = require("../services/followService");
 
 const isUserFollowing = async (req, res) => {
     try {
@@ -27,4 +27,38 @@ const isUserFollowing = async (req, res) => {
     }
 };
 
-module.exports = { isUserFollowing };
+const toggleFollow = async (req, res) => {
+    try {
+        const followerId = req.user.userId;
+        const { followingId } = req.params;
+
+        if (!followingId) {
+            return res.status(400).json({
+                message: 'Following user ID is required',
+            });
+        }
+
+        if (followerId === followingId) {
+            return res.status(400).json({
+                message: 'You cannot follow yourself',
+            });
+        }
+
+        const isFollowing = await toggleFollowService(followerId, followingId);
+
+        return res.status(200).json({
+            message: isFollowing
+                ? 'User followed successfully'
+                : 'User unfollowed successfully',
+            isFollowing,
+        });
+    } catch (error) {
+        console.error('Error in toggleFollow:', error);
+
+        return res.status(500).json({
+            message: 'Failed to update follow status',
+        });
+    }
+};
+
+module.exports = { isUserFollowing, toggleFollow };
