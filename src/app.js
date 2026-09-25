@@ -6,6 +6,7 @@ const authRoute = require('./routes/authRoute');
 const userRoute = require('./routes/userRoute');
 const restaurantRoute = require('./routes/restaurantRoute');
 const branchRoute = require('./routes/branchRoute');
+const followRoute = require('./routes/followRoute');
 
 const app = express();
 
@@ -26,5 +27,8 @@ app.use('/api/restaurant', restaurantRoute);
 
 // branch APIs
 app.use('/api/branch', branchRoute);
+
+// follow APIs
+app.use('/api/follow', followRoute);
 
 module.exports = app;
