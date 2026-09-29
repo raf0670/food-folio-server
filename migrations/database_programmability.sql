@@ -29,7 +29,7 @@ FROM (
 WHERE counts.id = review.id
   AND review.vouch_count IS DISTINCT FROM counts.actual_count;
 
--- Function 1: keep the denormalized vouch count synchronized.
+-- Function: vouch count synchronization
 CREATE OR REPLACE FUNCTION public.sync_review_vouch_count()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -67,7 +67,7 @@ BEGIN
 END;
 $$;
 
--- Function 2: review gallery rows must agree with their review and branch.
+-- Function: review gallery images must match with their review and branch
 CREATE OR REPLACE FUNCTION public.validate_gallery_review_links()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -105,7 +105,7 @@ BEGIN
 END;
 $$;
 
--- Function 3: enforce the no-self-follow rule at the database boundary.
+-- Function: no-self-follow
 CREATE OR REPLACE FUNCTION public.prevent_self_follow()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -140,7 +140,7 @@ BEFORE INSERT OR UPDATE ON public.follow
 FOR EACH ROW
 EXECUTE FUNCTION public.prevent_self_follow();
 
--- Procedure 1: create a review and its images as one database operation.
+-- Procedure: create a review and its images
 CREATE OR REPLACE PROCEDURE public.create_review_with_images(
   IN p_user_id uuid,
   IN p_branch_id uuid,
@@ -214,7 +214,7 @@ BEGIN
 END;
 $$;
 
--- Procedure 2: serialize vouch toggles for a review and return the new state.
+-- Procedure: vouch toggle
 CREATE OR REPLACE PROCEDURE public.toggle_review_vouch(
   IN p_user_id uuid,
   IN p_review_id uuid,
@@ -265,7 +265,7 @@ BEGIN
 END;
 $$;
 
--- Procedure 3: authorize and permanently delete a manager's restaurant review.
+-- Procedure: delete a manager's restaurant review.
 CREATE OR REPLACE PROCEDURE public.delete_review_as_manager(
   IN p_user_id uuid,
   IN p_review_id uuid,
@@ -299,7 +299,6 @@ BEGIN
 END;
 $$;
 
--- Keep these routines unavailable through Supabase's public RPC roles.
 REVOKE EXECUTE ON FUNCTION public.sync_review_vouch_count() FROM PUBLIC, anon, authenticated;
 REVOKE EXECUTE ON FUNCTION public.validate_gallery_review_links() FROM PUBLIC, anon, authenticated;
 REVOKE EXECUTE ON FUNCTION public.prevent_self_follow() FROM PUBLIC, anon, authenticated;
